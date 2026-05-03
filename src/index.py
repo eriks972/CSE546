@@ -1,5 +1,4 @@
 from collections import defaultdict
-import token
 
 from torch import mode
 from src.tokenize import tokenize
