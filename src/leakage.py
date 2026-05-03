@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 class LeakageTracker:
 
     def __init__(self):
