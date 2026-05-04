@@ -108,7 +108,7 @@ def benchmark(n_docs, mode="normal", remove_stopwords=False):
             correct += 1
 
     baseline_recovery = correct / compare_count if compare_count else 0.0
-    attack_recovery = keyword_recovery_attack(documents, index, key, remove_stopwords=remove_stopwords,log_path=f"results/leakage_{mode}_{n}.csv")
+    attack_recovery = keyword_recovery_attack(documents, index, key, remove_stopwords=remove_stopwords,log_path=f"results/leakage_{mode}_{n_docs}.csv")
 
     result = {
         "mode": mode,
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     # Setup time graph
     # ----------------------------
     plt.figure()
-    plt.plot(dataset_sizes, setup_times, marker="o")
+    plt.plot(dataset_sizes, setup_times, marker='o', linewidth=2)
     plt.yscale("log")
     plt.title("Dataset Size vs Setup Time")
     plt.xlabel("Documents")
@@ -199,9 +199,11 @@ if __name__ == "__main__":
     # ----------------------------
     plt.figure()
     plt.plot(dataset_sizes, query_times, marker="o")
-    plt.title("Dataset Size vs Query Time")
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.title("Average Query Time vs Dataset Size")
     plt.xlabel("Documents")
-    plt.ylabel("Query Time (seconds)")
+    plt.ylabel("Avg Query Time (seconds)")
+    plt.yscale("log")
     plt.grid(True)
     plt.savefig("results/query_time.png")
     plt.close()
@@ -213,9 +215,9 @@ if __name__ == "__main__":
     plt.hist(last_posting_sizes, bins=50)
     plt.xscale("log")
     plt.yscale("log")
-    plt.title("Posting List Size Distribution")
-    plt.xlabel("Number of Matches")
-    plt.ylabel("Frequency")
+    plt.title("Posting List Size Distribution (Heavy-Tailed)")
+    plt.xlabel("Posting List Size (Number of Documents)")
+    plt.ylabel("Frequency (log scale)")
     plt.grid(True)
     plt.savefig("results/posting_distribution.png")
     plt.close()
@@ -227,12 +229,13 @@ if __name__ == "__main__":
 
     plt.plot(dataset_sizes, normal_with_sw, marker="o", label="Normal (With Stopwords)")
     plt.plot(dataset_sizes, normal_without_sw, marker="o", label="Normal (No Stopwords)")
-    plt.plot(dataset_sizes, fp_with_sw, marker="o", label="FP (With Stopwords)")
-    plt.plot(dataset_sizes, fp_without_sw, marker="o", label="FP (No Stopwords)")
+    plt.plot(dataset_sizes, fp_with_sw, marker="o", label="FP (With Stopwords)", linestyle="--")
+    plt.plot(dataset_sizes, fp_without_sw, marker="o", label="FP (No Stopwords)", linestyle="--")
 
-    plt.title("Keyword Recovery Comparison (All Configurations)")
+    plt.title("Keyword Recovery Attack (Baseline vs Forward Privacy)")
     plt.xlabel("Dataset Size")
     plt.ylabel("Recovery Rate")
+    plt.ylim(0, 0.65)
     plt.legend()
     plt.grid(True)
 

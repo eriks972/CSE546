@@ -1,45 +1,63 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+import os
 
-df = pd.read_csv("results/leakage_forward_private_100000.csv")
+def plot_scatter(csv_path, output_path, title):
+    if not os.path.exists(csv_path):
+        print(f"File not found: {csv_path}")
+        return
 
-# ---- Handle edge cases ----
-if len(df) > 1 and df["matched_freq"].std() > 0:
-    corr = np.corrcoef(df["true_freq"], df["matched_freq"])[0, 1]
-else:
-    corr = 0.0
+    df = pd.read_csv(csv_path)
 
-print("Correlation (Forward-Private SSE):", corr)
+    # ---- Handle edge cases ----
+    if len(df) > 1 and df["matched_freq"].std() > 0:
+        corr = np.corrcoef(df["true_freq"], df["matched_freq"])[0, 1]
+    else:
+        corr = 0.0
 
-plt.figure()
+    print(f"{title} Correlation:", corr)
 
-# Scatter plot
-if len(df) > 0:
-    plt.scatter(df["true_freq"], df["matched_freq"], alpha=0.5)
+    plt.figure()
 
-    max_val = max(df["true_freq"])
+    if len(df) > 0:
+        plt.scatter(df["true_freq"], df["matched_freq"], alpha=0.5)
 
-    # Ideal diagonal line
-    plt.plot([0, max_val], [0, max_val], 'r--')
+        max_val = max(df["true_freq"])
 
-    # Add correlation text
-    plt.text(
-        0.05 * max_val,
-        0.9 * max_val,
-        f"Correlation = {corr:.3f}",
-        fontsize=12,
-        bbox=dict(facecolor='white', alpha=0.7)
+        # Ideal diagonal
+        plt.plot([0, max_val], [0, max_val], 'r--')
+
+        # Correlation text
+        plt.text(
+            0.05 * max_val,
+            0.9 * max_val,
+            f"Correlation = {corr:.3f}",
+            fontsize=12,
+            bbox=dict(facecolor='white', alpha=0.7)
+        )
+    else:
+        plt.text(0.5, 0.5, "No data (No leakage detected)",
+                 ha='center', va='center', fontsize=12)
+
+    plt.xlabel("True Frequency")
+    plt.ylabel("Matched Frequency")
+    plt.title(title)
+
+    plt.savefig(output_path)
+    plt.close()
+
+
+if __name__ == "__main__":
+    plot_scatter(
+        "results/leakage_forward_private_100000.csv",
+        "results/leakage_FP_scatter.png",
+        "Frequency Leakage (Forward-Private SSE)"
     )
 
-else:
-    # Empty dataset case
-    plt.text(0.5, 0.5, "No data (No leakage detected)", 
-             ha='center', va='center', fontsize=12)
-
-plt.xlabel("True Frequency")
-plt.ylabel("Matched Frequency")
-plt.title("Frequency Leakage (Forward-Private SSE)")
-
-plt.savefig("results/leakage_FP_scatter.png")
-plt.close()
+    plot_scatter(
+        "results/leakage_normal_100000.csv",
+        "results/leakage_normal_scatter.png",
+        "Frequency Leakage (Normal SSE)"
+    )
